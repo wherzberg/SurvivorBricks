@@ -1,0 +1,36 @@
+bundle:
+  name: data_ingestion
+
+include:
+  - resources/**/*.yml
+
+variables:
+  bronze_schema:
+    description: "Schema name for bronze layer tables"
+  silver_schema:
+    description: "Schema name for silver layer tables"
+  gold_schema:
+    description: "Schema name for gold layer tables"
+
+targets:
+
+  # Define the dev workspace
+  dev:
+    default: true
+    workspace:
+      host: https://dbc-07d01efe-7a2e.cloud.databricks.com
+
+    variables:
+      bronze_schema: dev_bronze
+      silver_schema: dev_silver
+      gold_schema: dev_gold
+
+  # Define the prod workspace
+  prod:
+    workspace:
+      host: https://dbc-07d01efe-7a2e.cloud.databricks.com
+
+    variables:
+      bronze_schema: prod_bronze
+      silver_schema: prod_silver
+      gold_schema: prod_gold

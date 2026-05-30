@@ -1,0 +1,35 @@
+name: Deploy to Prod
+
+# Trigger on push to main branch only
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-prod:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout your repo
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.11
+
+      # Step 3: Install Databricks CLI and DAB
+      - name: Install Databricks CLI & DAB
+        run: |
+          pip install --upgrade pip
+          pip install databricks-cli databricks-bundle
+
+      # Step 4: Deploy bundle to prod
+      - name: Deploy to Prod
+        run: databricks bundle deploy -t prod
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
