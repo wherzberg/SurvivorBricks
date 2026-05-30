@@ -1,0 +1,13 @@
+resources:
+  jobs:
+    test_schema_job:
+      name: "Test Schema Job"
+
+      parameters:
+        - name: bronze_schema
+          default: ${var.bronze_schema}
+          
+      tasks:
+        - task_key: run_test_schema
+          notebook_task:
+            notebook_path: ../../src/test_schema.py
