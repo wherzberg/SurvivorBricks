@@ -1,7 +1,7 @@
 resources:
   jobs:
     test_schema_job:
-      name: "Test Schema Job"
+      name: "${bundle.target}_test_job"
 
       parameters:
         - name: bronze_schema
