@@ -7,15 +7,22 @@ jobs:
   deploy-dev:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-      - name: Install Databricks CLI & DAB
+      - uses: actions/checkout@v4
+
+      - name: Install Databricks CLI
         run: |
-          pip install databricks-cli databricks-bundle
-      - name: Deploy to Dev
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+          databricks version
+
+      - name: Validate data_ingestion
+        working-directory: data_ingestion
+        run: databricks bundle validate -t dev
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+      - name: Deploy data_ingestion to Dev
+        working-directory: data_ingestion
         run: databricks bundle deploy -t dev
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
