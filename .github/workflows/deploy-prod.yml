@@ -9,26 +9,35 @@ on:
 jobs:
   deploy-prod:
     runs-on: ubuntu-latest
+    
+    # Define a strategy to deploy all bundles
+    strategy:
+      matrix:
+        bundle:
+          - data_ingestion
 
     steps:
-      # Step 1: Checkout your repo
+      # Step 1: Checkout the repository
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
-      # Step 2: Set up Python
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.11
-
-      # Step 3: Install Databricks CLI and DAB
-      - name: Install Databricks CLI & DAB
+      # Step 2: Install Databricks CLI
+      - name: Install Databricks CLI
         run: |
-          pip install --upgrade pip
-          pip install databricks-cli databricks-bundle
+          curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
+          databricks version
 
-      # Step 4: Deploy bundle to prod
-      - name: Deploy to Prod
+      # Step 3: Validate each bundle
+      - name: Validate ${{ matrix.bundle }}
+        working-directory: ${{ matrix.bundle }}
+        run: databricks bundle validate -t prod
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+      # Step 4: Deploy each bundle
+      - name: Deploy ${{ matrix.bundle }} to Prod
+        working-directory: ${{ matrix.bundle }}
         run: databricks bundle deploy -t prod
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
