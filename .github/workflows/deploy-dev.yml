@@ -6,23 +6,35 @@ on:
 jobs:
   deploy-dev:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
+    
+    # Define a strategy to deploy all bundles
+    strategy:
+      matrix:
+        bundle:
+          - data_ingestion
 
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      # Step 2: Install Databricks CLI
       - name: Install Databricks CLI
         run: |
           curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/install.sh | sh
           databricks version
 
-      - name: Validate data_ingestion
-        working-directory: data_ingestion
+      # Step 3: Validate each bundle
+      - name: Validate ${{ matrix.bundle }}
+        working-directory: ${{ matrix.bundle }}
         run: databricks bundle validate -t dev
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
-      - name: Deploy data_ingestion to Dev
-        working-directory: data_ingestion
+      # Step 4: Deploy each bundle
+      - name: Deploy ${{ matrix.bundle }} to Dev
+        working-directory: ${{ matrix.bundle }}
         run: databricks bundle deploy -t dev
         env:
           DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
