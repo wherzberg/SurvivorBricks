@@ -6,12 +6,17 @@ on:
 jobs:
   deploy-dev:
     runs-on: ubuntu-latest
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
     
     # Define a strategy to deploy all bundles
     strategy:
       matrix:
         bundle:
           - data_ingestion
+      max-parallel: 1
 
     steps:
       # Step 1: Checkout the repository
@@ -28,14 +33,8 @@ jobs:
       - name: Validate ${{ matrix.bundle }}
         working-directory: ${{ matrix.bundle }}
         run: databricks bundle validate -t dev
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
 
       # Step 4: Deploy each bundle
       - name: Deploy ${{ matrix.bundle }} to Dev
         working-directory: ${{ matrix.bundle }}
         run: databricks bundle deploy -t dev
-        env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
